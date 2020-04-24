@@ -1,0 +1,9 @@
+{
+    "user_api" : "http://35.232.34.230:8000",
+
+    "url_mapping_api" : "http://35.195.96.137:8080",
+
+    "analytics_api" : "http://35.246.70.211:8080",
+
+    "user_id_store": "userId.txt"
+}   

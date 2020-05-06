@@ -6,7 +6,8 @@ import specificStyle from '../StyleSheets/NewURLStyle'
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as FileSystem from 'expo-file-system';
-import config from '../Config/dev.json'
+import config from '../Config/dev.json';
+import window from '../Config/Base64';
 import axios from 'axios';
 
 export default class NewURL extends React.Component {
@@ -103,6 +104,19 @@ export default class NewURL extends React.Component {
             return;
         } 
         
+        // Check if Short URL is 10 characters Long
+        if (btnType !== "random" && shortUrl.length != 10) {
+            Alert.alert(
+                "Creating Failed",
+                "Short URL should be 10 characters long.",
+                [{
+                    text: 'Try Again'
+                }],
+                { cancelable: false}
+            );
+            return;
+        }
+
         if (btnType === "random"){
             shortUrl = "";
         }
@@ -111,10 +125,12 @@ export default class NewURL extends React.Component {
         axios({
 			method: "post",
 			url: config.url_mapping_api + "/url/create",
-			headers: {},
+			headers: { 
+				authorization: 'Basic ' + window.btoa(config.username + ":" + config.password)
+			},
 			data: {
 				shortUrl: shortUrl,
-                longUrl: longUrl,
+                longUrl: "http://" + longUrl,
                 user_id: userId,
                 created_at: currentDate,
                 terminated_at: expirationDate
@@ -189,6 +205,10 @@ export default class NewURL extends React.Component {
 
                     <View style={styles.newUrlBottomContainer} >
                         <View style= {styles.longURLInput} >
+
+                            <Text style={styles.newUrltext}>
+                                HTTP://
+                            </Text>
 
                             <TextInput  
                                     style={styles.newURLInputText}

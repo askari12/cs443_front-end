@@ -1,9 +1,15 @@
 {
-    "user_api" : "http://35.232.34.230:8000",
+    "user_api" : "http://user.linkly.ml/user",
 
-    "url_mapping_api" : "http://35.195.96.137:8080",
+    "url_mapping_api" : "http://mapping.linkly.ml",
 
-    "analytics_api" : "http://35.246.70.211:8080",
+    "analytics_api" : "http://analytics.linkly.ml",
 
-    "user_id_store": "userId.txt"
+    "user_id_store": "userId.txt",
+
+    "linkly_dns": "http://www.linkly.ml/",
+
+    "username" : "linklyadmin",
+
+    "password": "KuK,!q3a-9Xq(AB_"
 }   

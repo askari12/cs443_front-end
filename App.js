@@ -7,6 +7,7 @@ import SignUpScreen from "./screens/SignUpScreen"
 import MenuScreen from "./screens/MenuScreen"
 import NewUrlScreen from "./screens/NewURLScreen"
 import AnalyticScreen from "./screens/AnalyticScreen"
+import SettingsScreen from "./screens/SettingsScreen"
 
 const Navigator = createStackNavigator ({
   Login: { screen: LoginScreen},
@@ -14,6 +15,7 @@ const Navigator = createStackNavigator ({
   Menu: { screen: MenuScreen },
   NewURL: { screen: NewUrlScreen },
   UrlAnalytics: { screen: AnalyticScreen },
+  Settings: { screen: SettingsScreen },
 });
 
 const App = createAppContainer(Navigator);

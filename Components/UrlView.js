@@ -15,6 +15,10 @@ export default class UrlView extends React.Component {
             exDate: this.props.exDate,
             longUrl: this.props.longUrl,
             id: this.props.id,
+
+            createdAt: this.props.createdAt,
+            terminatedAt: this.props.terminatedAt,
+            userId: this.props.userId,
         }
 
         // Bind Methods
@@ -32,13 +36,17 @@ export default class UrlView extends React.Component {
             shortUrl: this.state.URL,
             expirationDate: this.state.exDate,
             id: this.state.id,
+            createdAt: this.state.createdAt,
+            terminatedAt: this.state.terminatedAt,
+            userId: this.state.userId,
         });
     }
 
     onShare = async () => {
         try {
             const result = await Share.share({
-                message: this.state.longUrl,
+                message: "View This Link Through Linkly ! \n" + 
+                config.linkly_dns + this.state.URL,
             });
         } catch (error) {
             console.log(error.message);
@@ -46,13 +54,13 @@ export default class UrlView extends React.Component {
     };
 
     openLink() {
-        Linking.openURL(this.state.longUrl);
+        Linking.openURL(config.linkly_dns + this.state.URL);
     };
 
     // Render Method
     render() {
         return (
-            <TouchableHighlight onLongPress={() => this.goToAnalytics()}>
+            <TouchableHighlight onPress={() => this.goToAnalytics()}>
                 <View style={styles.urlContainer} >
 
                     <Text style={styles.text}>{this.state.URL}</Text>

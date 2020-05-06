@@ -6,6 +6,7 @@ import specificStyle from '../StyleSheets/SignUpStyle'
 import axios from 'axios'
 
 import config from '../Config/dev.json';
+import window from '../Config/Base64';
 import * as FileSystem from 'expo-file-system';
 
 
@@ -111,9 +112,11 @@ export default class SignUp extends React.Component {
 		axios({
 			method: "post",
 			url: config.user_api +  "/createUser",
-			headers: {},
+			headers: { 
+				authorization: 'Basic ' + window.btoa(config.username + ":" + config.password)
+			},
 			data: {
-				firsName: fName,
+				firstName: fName,
 				lastName: lName,
 				email: email,
 				password: password
@@ -124,7 +127,7 @@ export default class SignUp extends React.Component {
 			console.log(result);
 			
 			// User Is Created
-			if (result.data === "true") {
+			if (res.status == 200 || res.status == 201 ) {
 
 				// Add User Credentials
 				this.writeToFile(result.userId);
@@ -142,8 +145,11 @@ export default class SignUp extends React.Component {
 
 			} 
 			
+		})
+		.catch(err=> {
+			
 			// User email already exists
-			else {
+			if (err.response.status == 403 || err.response.status == 404) {
 				Alert.alert(
 					"Sign Up Failed",
 					"This Email Already Exists",
@@ -154,6 +160,17 @@ export default class SignUp extends React.Component {
 				);
 			}
 
+			// Else 
+			else {
+				Alert.alert(
+					"Server Error",
+					"We're sorry for the inconvenience..",
+					[{
+						text: 'Try Again'
+					}],
+					{ cancelable: false}
+				);
+			}
 		});
 	};
 

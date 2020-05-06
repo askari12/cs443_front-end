@@ -6,9 +6,9 @@ import AnimatedLoader from 'react-native-animated-loader';
 
 import axios from 'axios';
 import config from '../Config/dev.json';
+import window from '../Config/Base64';
 
 import * as FileSystem from 'expo-file-system';
-
 
 export default class Login extends React.Component {
 
@@ -95,16 +95,20 @@ export default class Login extends React.Component {
 			return;
 		}
 
-		// Check inputs
 
+		console.log (config.user_api + "/checkPassword");
+
+		// Send inputs
 		this.setState({loaderVisibility: true});
 		axios({
 			method: "post",
 			url: config.user_api + "/checkPassword",
-			headers: {},
 			data: {
 				email: this.state.email,
 				password: this.state.password
+			},
+			headers: { 
+				authorization: 'Basic ' + window.btoa(config.username + ":" + config.password)
 			}
 		})
 		.then(res => {
@@ -114,13 +118,22 @@ export default class Login extends React.Component {
 
 			this.setState({loaderVisibility: false});
 
-			if (result.data === "true"){
+			if (res.status == 200 || res.status == 201){
 
 				// Store the userID value in a file
 				this.writeToFile(result.userId);
 
 				this.goToMenu();
-			} else {
+			} 
+	
+
+		})
+
+		.catch(err =>{
+			this.setState({loaderVisibility: false});
+			console.log(err);
+			
+			if (err.response.status == 401 || err.response.status == 403 || err.response.status == 404) {
 				Alert.alert(
 					"Login Failed",
 					"Your Email or Password was incorrect..",
@@ -130,7 +143,18 @@ export default class Login extends React.Component {
 					{ cancelable: false}
 				);
 			}
-
+				
+			// Else 
+			else {
+				Alert.alert(
+					"Server Error",
+					"We're sorry for the inconvenience..",
+					[{
+						text: 'Try Again'
+					}],
+					{ cancelable: false}
+				);
+			}
 		});
 		
 	}

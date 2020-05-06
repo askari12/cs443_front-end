@@ -11,7 +11,6 @@ const style = StyleSheet.create({
     newUrlBottomContainer: {
         width: "100%",
         height: "100%",
-        borderWidth: 1,
         alignItems: "center",
         justifyContent: "space-evenly",
         paddingBottom: 80
@@ -26,7 +25,8 @@ const style = StyleSheet.create({
         borderWidth: 5,
         borderColor: "#0d47a1",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        flexDirection: "row",
     },
     shortURLInput: {
         width: "90%",
@@ -72,7 +72,7 @@ const style = StyleSheet.create({
         height:50,
         color:"black",
         fontSize: 20,
-        textAlign: "center",
+        // textAlign: "center",
     },
 
     // Text

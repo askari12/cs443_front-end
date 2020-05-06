@@ -6,9 +6,15 @@ import specificStyle from '../StyleSheets/MenuStyle'
 import UrlView from '../Components/UrlView'
 import AnimatedLoader from 'react-native-animated-loader';
 
-import config from '../Config/dev.json'
+import config from '../Config/dev.json';
+import window from '../Config/Base64';
+
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios'
+
+import JSONbig from 'json-bigint'
+
+import { StackActions, NavigationActions } from 'react-navigation';
 
 export default class MainPage extends React.Component {
 
@@ -24,11 +30,14 @@ export default class MainPage extends React.Component {
             user_id: "",
 
             loaderVisibility: false,
+
+            menuEmpty: true,
         }
 
         this.goToNewURL = this.goToNewURL.bind(this);
         this.goToURLAnalytics = this.goToURLAnalytics.bind(this);
         this.goToLogin = this.goToLogin.bind(this);
+        this.goToSettings = this.goToSettings.bind(this);
 
         this.deleteUserId = this.deleteUserId.bind(this);
         this.readFromFile = this.readFromFile.bind(this);
@@ -47,29 +56,44 @@ export default class MainPage extends React.Component {
 
         this.setState({loaderVisibility: true});
         this.readFromFile().then (res => {
- 
+            
+            this.setState({user_id: res});
 
             // Add URL data
             axios({
             	method: "get",
             	url: config.url_mapping_api + "/url/user/getAll/" + res,
-            	headers: {},
+                headers: { 
+				    authorization: 'Basic ' + window.btoa(config.username + ":" + config.password)
+			    },
+                transformResponse: data => JSONbig.parse(data),
             })
             .then(res => {
                 const result = res.data;
                 
-                var randDict = []
+                var randDict = [];
+
+                console.log(result);
                 for (var i = 0 ; i < result.length ; i++) {
-                    randDict.push( { 'URL': result[i].shortUrl , 'exDate': result[i].terminated_at.slice(0, 10) , 'longUrl' : result[i].longUrl , 'id' : result[i]._id});
+                    randDict.push( { 'URL': result[i].shortUrl , 'exDate': result[i].terminated_at.slice(0, 10) , 'longUrl' : result[i].longUrl , 'id' : result[i]._id , 'createdAt': result[i].created_at , 'terminatedAt': result[i].terminated_at});
+                }
+
+                var menuEmpty = this.state.menuEmpty;
+                
+                if (randDict.length > 0) {
+                    menuEmpty = false;
                 }
 
                 this.setState({loaderVisibility: false});
-                this.setState({data: randDict});
+                this.setState({data: randDict , menuEmpty: menuEmpty});               
 
                 console.log(randDict);
 
             })
             .catch(err =>{
+
+                console.log(err);
+                
                 Alert.alert(
 					"Server Error",
 					"We are sorry for the inconvenince...",
@@ -84,7 +108,7 @@ export default class MainPage extends React.Component {
 
 
 		});    
-      }
+    }
 
     async componentDidMount() {
 
@@ -95,7 +119,7 @@ export default class MainPage extends React.Component {
 
     // and don't forget to remove the listener
     componentWillUnmount () {
-        this.focusListener.remove()
+        this.focusListener.remove();
     }
 
     // Methods
@@ -115,7 +139,15 @@ export default class MainPage extends React.Component {
 
     goToLogin() {
         this.deleteUserId();
-        this.props.navigation.navigate('Login');
+        const resetAction = StackActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Login' })],
+        });
+        this.props.navigation.dispatch(resetAction);
+    }
+
+    goToSettings() {
+        this.props.navigation.navigate('Settings');
     }
 
     deleteUserId = async () => {
@@ -137,10 +169,14 @@ export default class MainPage extends React.Component {
             <View style={styles.container}>
                 <View style={styles.menuContainer}>
 
-                <AnimatedLoader visible={this.state.loaderVisibility}          overlayColor="rgba(255,255,255,0.75)"          animationStyle={{width: 100 , height: 100}}          speed={1}        />
+                    <AnimatedLoader visible={this.state.loaderVisibility}          overlayColor="rgba(255,255,255,0.75)"          animationStyle={{width: 100 , height: 100}}          speed={1}        />
                     <View style= {styles.topBar} >
-                        <Text style={styles.logoText}>LINKLY</Text>
+                        {/* <Text style={styles.logoText}>LINKLY</Text> */}
                         
+                        <TouchableOpacity style={styles.barBtn} onPress={this.goToSettings} >
+                            <Text style={styles.text}>Settings</Text>
+                        </TouchableOpacity>
+
                         <TouchableOpacity style={styles.barBtn} onPress={this.goToNewURL} >
                             <Text style={styles.text}>New URL</Text>
                         </TouchableOpacity>
@@ -151,6 +187,7 @@ export default class MainPage extends React.Component {
 
                     </View>
 
+                    { !this.state.menuEmpty  &&
                     <FlatList 
 
                         numColumns={2}
@@ -158,10 +195,25 @@ export default class MainPage extends React.Component {
                         data= {this.state.data}
                         renderItem={({item}) => (
                             <View style={styles.menuFlatList}>
-                               <UrlView URL={item.URL} exDate={item.exDate} longUrl={item.longUrl} id={item.id} navigation={this.props.navigation} />
+                               <UrlView URL={item.URL} exDate={item.exDate} longUrl={item.longUrl} id={item.id} createdAt={item.createdAt} terminatedAt={item.terminatedAt} userId={this.state.user_id} navigation={this.props.navigation} />
                             </View>
                         )}
                     />
+                    }
+
+                    { this.state.menuEmpty &&
+
+                    <View style={styles.menuEmptyTextContainer}>
+                        <Text style={styles.menuText}>
+                            Welcome to LINKLY !
+                        </Text>
+
+                        <Text style={styles.menuText}>
+                            Create a New Url to populate this page !
+                        </Text>
+                    </View>
+
+                    }
 
                     
                 </View>
